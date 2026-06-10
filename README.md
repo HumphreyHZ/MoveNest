@@ -1,5 +1,7 @@
 # MoveNest
 
+Online demo: [https://humphreyhz.github.io/MoveNest/](https://humphreyhz.github.io/MoveNest/)
+
 MoveNest is a clickable mobile web prototype for a gentle home workout product. It explores one narrow product hypothesis: whether a clear recommendation, low-impact explanation, and in-workout control can help a busy first-time user start a short home session with less hesitation.
 
 The prototype uses rules and React state to simulate personalization; it does not connect to a real AI model or health data service.
