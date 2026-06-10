@@ -9,9 +9,8 @@ The prototype uses rules and React state to simulate personalization; it does no
 ## Project Documents
 
 - [Project overview](docs/project-overview.md)
-- [Product requirements](docs/prd.md)
 - [Research and competitor review](docs/research.md)
-- [AI process and review method](docs/ai-process.md)
+- [PRD and AI implementation retrospective](docs/prd-ai-retrospective.md)
 
 ## How to Run
 

@@ -5,9 +5,8 @@
 | 内容 | 文件或位置 | 状态 |
 | --- | --- | --- |
 | 产品原型 | `src/App.jsx` | 已完成，可本地运行 |
-| 产品需求与范围 | `docs/prd.md` | 已完成 |
 | 用户与竞品研究 | `docs/research.md` | 已完成，已标注研究限制 |
-| AI 使用过程 | `docs/ai-process.md` | 已完成，已标注追溯限制 |
+| PRD 与 AI 实现复盘 | `docs/prd-ai-retrospective.md` | 已完成 |
 | 运行与文档导航 | `README.md` | 已完成 |
 | 在线 Demo | 未提供 | 待部署 |
 | 用户测试结果 | 未提供 | 待完成真实测试后补充 |
@@ -84,9 +83,8 @@ MoveNest/
 ├─ README.md
 ├─ docs/
 │  ├─ project-overview.md
-│  ├─ prd.md
 │  ├─ research.md
-│  └─ ai-process.md
+│  └─ prd-ai-retrospective.md
 ├─ src/
 └─ package.json
 ```
