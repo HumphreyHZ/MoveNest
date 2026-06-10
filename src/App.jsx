@@ -9,7 +9,8 @@ import {
   Home,
   Leaf,
   Pause,
-  RotateCcw,
+  Play,
+  SkipForward,
   Sparkles,
   Timer,
   Wind,
@@ -142,6 +143,7 @@ function App() {
   const [feedback, setFeedback] = useState('Just right');
   const [isPaused, setIsPaused] = useState(false);
   const [activeMoveIndex, setActiveMoveIndex] = useState(0);
+  const [tomorrowPlanSaved, setTomorrowPlanSaved] = useState(false);
   const selectedCourse =
     courses.find((course) => course.id === selectedCourseId) ?? courses[0];
   const [remainingSeconds, setRemainingSeconds] = useState(
@@ -204,6 +206,7 @@ function App() {
         onToggleCheckIn={toggleCheckIn}
         onOpenWorkout={selectCourse}
         onBack={() => navigate('welcome')}
+        tomorrowPlanSaved={tomorrowPlanSaved}
       />
     ),
     detail: (
@@ -238,7 +241,10 @@ function App() {
         feedback={feedback}
         onBack={() => navigate('active')}
         onFeedback={setFeedback}
-        onSavePlan={() => navigate('home')}
+        onSavePlan={() => {
+          setTomorrowPlanSaved(true);
+          navigate('home');
+        }}
       />
     ),
   }[screen];
@@ -309,6 +315,7 @@ function HomeScreen({
   onToggleCheckIn,
   onOpenWorkout,
   onBack,
+  tomorrowPlanSaved,
 }) {
   const recommendedCourse = selectedCheckIns.includes(
     'I only have 8 minutes',
@@ -337,17 +344,21 @@ function HomeScreen({
     <ScreenFrame>
       <AppHeader onBack={onBack} title="Home" showAvatar />
 
+      {tomorrowPlanSaved ? (
+        <div
+          role="status"
+          className="mt-6 flex items-center gap-3 rounded-[1.5rem] bg-white px-5 py-4 text-base font-black text-health-orange shadow-card"
+        >
+          <Check className="h-5 w-5 shrink-0" strokeWidth={3} />
+          Tomorrow&apos;s 10-minute plan is saved.
+        </div>
+      ) : null}
+
       <section className="mt-8">
-        <div className="mb-4 flex items-center justify-between px-5">
+        <div className="mb-4 px-5">
           <h2 className="text-[1.7rem] font-black tracking-normal text-black">
             Today's plan
           </h2>
-          <button
-            type="button"
-            className="text-[1.35rem] font-semibold text-health-blue transition active:scale-95"
-          >
-            Edit
-          </button>
         </div>
 
         <button
@@ -371,7 +382,7 @@ function HomeScreen({
               className="mt-5 aspect-[16/9] w-full"
             />
 
-            <div className="mt-6 flex items-end justify-between gap-4">
+            <div className="mt-6">
               <div>
                 <p className="text-[2.6rem] font-black leading-none text-black">
                   {getCourseMinutes(recommendedCourse.duration)}
@@ -383,7 +394,6 @@ function HomeScreen({
                   {recommendedCourse.recommendation}
                 </p>
               </div>
-              <MiniBars />
             </div>
             <div className="mt-7 flex items-center justify-between rounded-full bg-health-orange px-5 py-3 text-lg font-black text-white">
               <span>View workout</span>
@@ -426,6 +436,7 @@ function HomeScreen({
                   type="button"
                   key={option}
                   onClick={() => onToggleCheckIn(option)}
+                  aria-pressed={active}
                   className={`flex min-h-14 w-full items-center justify-between rounded-[1.25rem] px-4 text-left text-base font-black transition duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-health-blue/25 ${
                     active
                       ? 'bg-health-orange text-white'
@@ -572,11 +583,11 @@ function ActiveWorkoutScreen({
     <ScreenFrame>
       <NavHeader onBack={onBack} title={activeMove.name} />
 
-      <section className="mt-9">
-        <p className="px-1 text-lg font-black uppercase text-health-muted">
+      <section className="mt-4">
+        <p className="px-1 text-base font-black uppercase text-health-muted">
           Current move
         </p>
-        <HealthCard className="mt-4 p-7">
+        <HealthCard className="mt-3 p-4">
           <div className="flex items-center justify-between">
             <MetricLabel color="orange" icon={<Timer />}>
               Time left
@@ -586,17 +597,17 @@ function ActiveWorkoutScreen({
             </span>
           </div>
 
-          <div className="mt-10 flex items-center justify-center">
-            <div className="relative flex h-64 w-64 items-center justify-center rounded-full bg-health-soft">
+          <div className="mt-4 flex items-center justify-center">
+            <div className="relative flex h-48 w-48 items-center justify-center rounded-full bg-health-soft">
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
                   background: `conic-gradient(#ff5a1f ${progress}%, #e3e3ea ${progress}% 100%)`,
                 }}
               />
-              <div className="absolute inset-5 rounded-full bg-white" />
+              <div className="absolute inset-4 rounded-full bg-white" />
               <div className="relative text-center">
-                <p className="text-[4.3rem] font-black leading-none text-black">
+                <p className="text-[3.25rem] font-black leading-none text-black">
                   {time}
                 </p>
                 <p className="mt-3 text-lg font-black text-health-muted">
@@ -607,11 +618,11 @@ function ActiveWorkoutScreen({
           </div>
         </HealthCard>
 
-        <HealthCard className="mt-5 p-6">
-          <p className="text-lg font-black uppercase text-health-muted">
+        <HealthCard className="mt-3 p-4">
+          <p className="text-sm font-black uppercase text-health-muted">
             Form tip
           </p>
-          <p className="mt-4 text-[1.7rem] font-black leading-tight text-black">
+          <p className="mt-2 text-[1.25rem] font-black leading-tight text-black">
             {activeMove.tip}
           </p>
         </HealthCard>
@@ -623,23 +634,31 @@ function ActiveWorkoutScreen({
         </div>
       ) : null}
 
-      <section className="mt-5 grid grid-cols-3 gap-3">
-        <ActionButton onClick={onPause} icon={<Pause />}>
+      <section className="mt-3 grid grid-cols-3 gap-3">
+        <ActionButton
+          onClick={onPause}
+          icon={isPaused ? <Play /> : <Pause />}
+          ariaPressed={isPaused}
+        >
           {isPaused ? 'Resume' : 'Pause'}
         </ActionButton>
-        <ActionButton onClick={onTooHard} icon={<Sparkles />}>
+        <ActionButton
+          onClick={onTooHard}
+          icon={<Sparkles />}
+          ariaPressed={tooHard}
+        >
           Too hard
         </ActionButton>
         <ActionButton
           onClick={onSkip}
-          icon={<RotateCcw />}
+          icon={<SkipForward />}
           disabled={activeMoveIndex === course.activeMoves.length - 1}
         >
           Skip
         </ActionButton>
       </section>
 
-      <div className="mt-6 pb-4">
+      <div className="mt-4 pb-4">
         <PrimaryButton onClick={onComplete}>
           Complete workout
           <Check className="h-5 w-5" strokeWidth={3} />
@@ -658,7 +677,7 @@ function CompletionScreen({ course, feedback, onBack, onFeedback, onSavePlan }) 
         <div className="mb-7 flex h-24 w-24 items-center justify-center rounded-full bg-[linear-gradient(145deg,#ff7a3d,#ff4d1f)] text-white shadow-card">
           <Check className="h-12 w-12" strokeWidth={3.1} />
         </div>
-        <h1 className="text-[3.45rem] font-black leading-[0.98] tracking-normal text-black">
+          <h1 className="max-w-[20rem] text-[3rem] font-black leading-[0.98] tracking-normal text-black">
           You showed up. That counts.
         </h1>
       </section>
@@ -691,6 +710,7 @@ function CompletionScreen({ course, feedback, onBack, onFeedback, onSavePlan }) 
                 type="button"
                 key={option}
                 onClick={() => onFeedback(option)}
+                aria-pressed={active}
                 className={`min-h-24 rounded-[1.65rem] px-3 text-center text-base font-black transition duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-health-blue/25 ${
                   active
                     ? 'bg-health-orange text-white shadow-card'
@@ -766,8 +786,8 @@ function AppHeader({ onBack, title, showAvatar = false }) {
 
 function NavHeader({ onBack, title }) {
   return (
-    <header className="relative flex h-24 items-center justify-center pt-3">
-      <div className="absolute left-0 top-3">
+    <header className="relative flex h-20 items-center justify-center">
+      <div className="absolute left-0 top-2">
         <CircleButton onClick={onBack} ariaLabel="Go back">
           <ChevronLeft className="h-8 w-8" strokeWidth={3} />
         </CircleButton>
@@ -783,7 +803,7 @@ function CircleButton({ children, onClick, ariaLabel }) {
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
-      className="flex h-[4.35rem] w-[4.35rem] items-center justify-center rounded-full bg-white text-black shadow-circle transition duration-200 hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-health-blue/25"
+      className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-black shadow-circle transition duration-200 hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-health-blue/25"
     >
       {children}
     </button>
@@ -900,7 +920,7 @@ function Metric({ icon, label, value }) {
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-health-soft text-health-orange [&_svg]:h-6 [&_svg]:w-6 [&_svg]:stroke-[2.8]">
         {icon}
       </div>
-      <p className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-health-muted">
+      <p className="mt-4 text-[0.68rem] font-black uppercase tracking-[0.12em] text-health-muted">
         {label}
       </p>
       <p className="mt-2 text-base font-black text-black">{value}</p>
@@ -936,22 +956,6 @@ function IconBubble({ children, color }) {
   );
 }
 
-function MiniBars() {
-  return (
-    <div className="flex h-24 items-end gap-2">
-      {[28, 58, 38, 76].map((height, index) => (
-        <span
-          key={height}
-          className={`w-4 rounded-full ${
-            index === 3 ? 'bg-health-orange' : 'bg-[#e4e4eb]'
-          }`}
-          style={{ height }}
-        />
-      ))}
-    </div>
-  );
-}
-
 function PrimaryButton({ children, onClick }) {
   return (
     <button
@@ -964,13 +968,20 @@ function PrimaryButton({ children, onClick }) {
   );
 }
 
-function ActionButton({ children, icon, onClick, disabled = false }) {
+function ActionButton({
+  children,
+  icon,
+  onClick,
+  disabled = false,
+  ariaPressed,
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex min-h-[5.4rem] flex-col items-center justify-center gap-2 rounded-[1.5rem] bg-white px-2 py-3 text-center text-sm font-black text-black shadow-card transition duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-health-blue/25 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:stroke-[3]"
+      aria-pressed={ariaPressed}
+      className="flex min-h-[4.75rem] flex-col items-center justify-center gap-1.5 rounded-[1.5rem] bg-white px-2 py-3 text-center text-sm font-black text-black shadow-card transition duration-200 hover:-translate-y-0.5 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-health-blue/25 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:stroke-[3]"
     >
       <span className="text-health-orange">{icon}</span>
       {children}
