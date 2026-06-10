@@ -52,7 +52,7 @@ const courses = [
       },
       {
         name: 'Standing Core',
-        tip: 'Keep one hand near the wall if balance feels tender.',
+        tip: 'Keep one hand near the wall if you need support.',
         seconds: 40,
       },
     ],
@@ -67,7 +67,7 @@ const courses = [
     imageAlt: 'A woman doing a gentle standing side bend at home.',
     imagePosition: 'center center',
     level: 'Beginner',
-    tags: ['Small space', 'No equipment', 'Morning friendly'],
+    tags: ['Small space', 'No equipment', 'Good for mornings'],
     goals: ['Mobility', 'Energy', 'Posture'],
     moves: [
       { name: 'Shoulder Openers', image: moveGentleWarmup },
@@ -79,21 +79,21 @@ const courses = [
     activeMoves: [
       {
         name: 'Side Reach',
-        tip: 'Reach long through your fingertips. Keep your breath easy.',
+        tip: 'Reach through your fingertips and keep breathing steadily.',
         seconds: 40,
       },
       {
         name: 'Wall Chest Stretch',
-        tip: 'Keep the shoulder low and stop before any sharp pull.',
+        tip: 'Keep your shoulder relaxed. Stop if you feel any sharp pain.',
         seconds: 35,
       },
     ],
   },
   {
     id: 'evening-stretch-unwind',
-    planName: 'Evening Option',
-    recommendation: '10-min Evening Stretch Unwind',
-    title: 'Evening Stretch Unwind',
+    planName: 'Evening stretch',
+    recommendation: '10-min Evening Wind-down',
+    title: 'Evening Wind-down Stretch',
     duration: '10 min',
     image: eveningStretchImage,
     imageAlt: 'A woman doing a calm seated stretch on a mat at home.',
@@ -112,7 +112,7 @@ const courses = [
     activeMoves: [
       {
         name: 'Seated Side Stretch',
-        tip: 'Let the ribs soften. Keep the stretch easy.',
+        tip: 'Keep your shoulders relaxed and breathe into the stretch.',
         seconds: 45,
       },
       {
@@ -125,8 +125,8 @@ const courses = [
 ];
 
 const checkInOptions = [
-  'I feel tired',
-  'I have knee discomfort',
+  "I'm low on energy",
+  'My knees feel sensitive today',
   'I only have 8 minutes',
 ];
 
@@ -135,7 +135,9 @@ const feedbackOptions = ['Too easy', 'Just right', 'Too hard'];
 function App() {
   const [screen, setScreen] = useState('welcome');
   const [selectedCourseId, setSelectedCourseId] = useState(courses[0].id);
-  const [selectedCheckIns, setSelectedCheckIns] = useState(['I feel tired']);
+  const [selectedCheckIns, setSelectedCheckIns] = useState([
+    "I'm low on energy",
+  ]);
   const [tooHard, setTooHard] = useState(false);
   const [feedback, setFeedback] = useState('Just right');
   const [isPaused, setIsPaused] = useState(false);
@@ -279,10 +281,10 @@ function WelcomeScreen({ onStart }) {
             </IconBubble>
             <div>
               <p className="text-[1.7rem] font-black leading-tight text-black">
-                Personalized 12-minute workouts
+                Short workouts that fit your day
               </p>
               <p className="mt-3 text-lg font-semibold leading-7 text-health-muted">
-                For your energy, space and mood.
+                Most sessions take 8 to 12 minutes and need no equipment.
               </p>
             </div>
           </div>
@@ -308,15 +310,27 @@ function HomeScreen({
   onOpenWorkout,
   onBack,
 }) {
-  const recommendedCourse = courses[0];
+  const recommendedCourse = selectedCheckIns.includes(
+    'I only have 8 minutes',
+  )
+    ? courses[1]
+    : courses[0];
   const personalization = useMemo(() => {
+    const notes = [];
+
+    if (selectedCheckIns.includes("I'm low on energy")) {
+      notes.push("We'll keep the pace gentle today.");
+    }
+    if (selectedCheckIns.includes('My knees feel sensitive today')) {
+      notes.push("We'll avoid jumping and reduce knee load.");
+    }
     if (selectedCheckIns.includes('I only have 8 minutes')) {
-      return 'Trimmed to a shorter, calmer first session.';
+      notes.push("We'll keep the workout to eight minutes.");
     }
-    if (selectedCheckIns.includes('I have knee discomfort')) {
-      return 'Matched with no jumping and softer lower-body work.';
-    }
-    return 'Matched to a low-pressure start after a long day.';
+
+    return notes.length
+      ? notes.join(' ')
+      : 'Choose any that apply. You can change this before every workout.';
   }, [selectedCheckIns]);
 
   return (
@@ -326,7 +340,7 @@ function HomeScreen({
       <section className="mt-8">
         <div className="mb-4 flex items-center justify-between px-5">
           <h2 className="text-[1.7rem] font-black tracking-normal text-black">
-            Today's recommendation
+            Today's plan
           </h2>
           <button
             type="button"
@@ -344,7 +358,7 @@ function HomeScreen({
           <HealthCard className="min-h-[174px] p-6 transition duration-200 group-hover:-translate-y-0.5 group-active:scale-[0.99]">
             <div className="flex items-center justify-between">
               <MetricLabel color="orange" icon={<Flame />}>
-                {recommendedCourse.planName}
+                Recommended
               </MetricLabel>
               <div className="flex items-center gap-2 text-health-muted">
                 <span className="text-lg font-semibold">Today</span>
@@ -372,7 +386,7 @@ function HomeScreen({
               <MiniBars />
             </div>
             <div className="mt-7 flex items-center justify-between rounded-full bg-health-orange px-5 py-3 text-lg font-black text-white">
-              <span>Select this class</span>
+              <span>View workout</span>
               <ArrowRight className="h-5 w-5" strokeWidth={3} />
             </div>
           </HealthCard>
@@ -392,8 +406,8 @@ function HomeScreen({
 
       <section className="mt-9">
         <SectionTitle
-          title="Check-in"
-          description="A light AI adjustment before you begin."
+          title="Before you start"
+          description="Choose any that apply today."
         />
         <HealthCard className="mt-4 p-5">
           <div className="mb-5 flex items-start gap-3">
@@ -436,7 +450,7 @@ function HomeScreen({
       <section className="mt-9">
         <SectionTitle
           title="Choose a class"
-          description="Pick the one that matches your time and energy."
+          description="Pick one that suits your time and energy today."
         />
         <div className="mt-4 space-y-4">
           {courses.map((course) => (
@@ -477,8 +491,8 @@ function WorkoutDetailScreen({ course, onBack, onStart }) {
 
       <section className="mt-9">
         <SectionTitle
-          title="Training goals"
-          description="Enough movement to shift your energy."
+          title="What you'll work on"
+          description="Mobility, light strength and a gentle rise in heart rate."
         />
         <div className="mt-4 flex flex-wrap gap-3">
           {course.goals.map((goal) => (
@@ -495,7 +509,7 @@ function WorkoutDetailScreen({ course, onBack, onStart }) {
       <section className="mt-9">
         <SectionTitle
           title="Moves in this class"
-          description="A quick visual cue for each low-impact step."
+          description="Five simple movements, with no jumping."
         />
         <div className="mt-4 space-y-3">
           {course.moves.map((move, index) => (
@@ -529,7 +543,7 @@ function WorkoutDetailScreen({ course, onBack, onStart }) {
 
       <div className="mt-6 pb-4">
         <PrimaryButton onClick={onStart}>
-          Start Workout
+          Start workout
           <ArrowRight className="h-5 w-5" strokeWidth={3} />
         </PrimaryButton>
       </div>
@@ -565,10 +579,10 @@ function ActiveWorkoutScreen({
         <HealthCard className="mt-4 p-7">
           <div className="flex items-center justify-between">
             <MetricLabel color="orange" icon={<Timer />}>
-              Timer
+              Time left
             </MetricLabel>
             <span className="text-lg font-black text-health-muted">
-              {isPaused ? 'Paused' : 'Steady'}
+              {isPaused ? 'Paused' : 'In progress'}
             </span>
           </div>
 
@@ -595,7 +609,7 @@ function ActiveWorkoutScreen({
 
         <HealthCard className="mt-5 p-6">
           <p className="text-lg font-black uppercase text-health-muted">
-            Coach cue
+            Form tip
           </p>
           <p className="mt-4 text-[1.7rem] font-black leading-tight text-black">
             {activeMove.tip}
@@ -627,7 +641,7 @@ function ActiveWorkoutScreen({
 
       <div className="mt-6 pb-4">
         <PrimaryButton onClick={onComplete}>
-          Complete Workout
+          Complete workout
           <Check className="h-5 w-5" strokeWidth={3} />
         </PrimaryButton>
       </div>
@@ -667,7 +681,7 @@ function CompletionScreen({ course, feedback, onBack, onFeedback, onSavePlan }) 
       <section className="mt-9">
         <SectionTitle
           title="How did this feel?"
-          description="Your next plan will adjust from here."
+          description="We'll use your answer for tomorrow's plan."
         />
         <div className="mt-4 grid grid-cols-3 gap-3">
           {feedbackOptions.map((option) => {
